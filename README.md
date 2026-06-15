@@ -1,7 +1,7 @@
 # subglacial_hydrology_ktransect
 
 ## generate_forcing_files.py
-Dependencies: load_data.py, velocities.py, lake_drainage.py, surface_hydrology.py 
+**Dependencies:** `load_data.py`, `velocities.py`, `lake_drainage.py`, `surface_hydrology.py` 
 
 Generate forcing files for Elmer/Ice GlaDS simulations over the k-transect, SW Greenland. 
 The script reads in a config file (e.g. config_2009.yaml) which contains all relevant parameters and data, including

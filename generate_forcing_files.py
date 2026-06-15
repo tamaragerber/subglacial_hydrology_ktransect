@@ -4,9 +4,6 @@
 """
 Generate daily subglacial hydrology forcing files for GlaDS / Elmer/Ice.
 
-
-
-
 # This script converts elevation-dependent surface runoff / melt (from SEBM or
 # similar models) into spatially distributed daily water input fields on an ice
 # sheet DEM. It produces NetCDF forcing files suitable for subglacial hydrology
@@ -25,15 +22,14 @@ Generate daily subglacial hydrology forcing files for GlaDS / Elmer/Ice.
 #    - Builds spatial fields of:
 #      a) cumulative melt threshold for hydrofracture initiation (Tm)
 #      b) fraction of accumulated water that can drain vertically (Th)
-#    - Both vary linearly between user-defined elevation bounds:
-#        lower_elev → upper_elev
+#    - Both vary linearly between user-defined elevation bounds (defined in the config file).
+#
 
 # 3. SURFACE WATER STORAGE & HYDROFRACTURE LOGIC
 #    - Surface melt is accumulated on each grid cell
 #    - Water is retained until a cumulative threshold is reached
 #    - Once threshold is exceeded:
-#        → all stored water is released instantaneously
-#        → hydrofracture drainage is triggered
+#        → all stored water is released instantaneously to the sheet
 #    - After first drainage event:
 #        → melt is routed directly to the bed (no further storage)
 

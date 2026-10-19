@@ -5,6 +5,9 @@
 ! domain K-transect
 ! written by Tamara Gerber
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!---LUA BEGIN
+! assert(loadfile('parameters_mks_hkc_llc.lua'))()
+!---LUA END
 include read_parameters.in
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 !#######################################################

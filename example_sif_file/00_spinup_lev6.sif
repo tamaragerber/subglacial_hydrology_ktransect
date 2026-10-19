@@ -1,0 +1,147 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! .sif file for the initialisation
+! of greenland transient simulations
+!
+! domain K-transect
+! written by Tamara Gerber
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+include read_parameters.in
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!#######################################################
+!#######################################################
+Header
+  Mesh DB "." "domain"
+End
+!#######################################################
+!#######################################################
+Constants
+  sea level = Real $zsl
+  water density = Real $rhow
+  Hydraulic Potential Variable Name = String "Hydraulic Potential"
+  Ice thickness Variable Name = String "h"
+  Surface Variable Name = String "Zs"
+End
+!#######################################################
+!#######################################################
+Simulation
+  Coordinate System  = Cartesian 
+  Simulation Type = Steady State
+
+  Steady State Min Iterations = 1
+  Steady State Max Iterations = 1
+
+  Output File = "INIT500_.result"
+  Post File = "INIT500_.vtu"
+  max output level = 3
+End
+!#######################################################
+!#######################################################
+Body 1
+  Equation = 1
+  Material = 1
+  Initial condition = 1
+End
+!#######################################################
+!#######################################################
+Material 1
+  Density = Real $rhow
+  Glen Exponent = Real $ng
+ 
+  !---------------------------------------------------
+  !For the Sheet
+  !---------------------------------------------------
+  Sheet Conductivity = Real $Ks
+  Sheet flow exponent alpha = Real $alphas
+  Sheet flow exponent beta = Real $betas
+  Englacial Void Ratio = Real $ev 
+  Bedrock Bump Length = Real $lr 
+  Bedrock Bump High = Real $hr 
+  Sheet Closure Coefficient = Real $Ar
+  Sliding Velocity = Real $ub
+  
+  !---------------------------------------------------
+  !For the Channels
+  !---------------------------------------------------
+  Channel Conductivity = Real $Kc
+  Channel flow exponent alpha = Real $alphac
+  Channel flow exponent beta = Real $betac
+  Channel Closure Coefficient = Real $Ac
+  Sheet Width Over Channel = Real $lc
+  Pressure Melting Coefficient = Real $Ct
+  Water Heat Capacity = Real $Cw
+  
+  !---------------------------------------------------
+  ! coupled
+  !---------------------------------------------------
+  Ice Normal Stress = Variable "h" 
+     Real lua "rhoi*g*tx" 
+End
+!#######################################################
+!#######################################################
+Solver 1
+  Equation = Reader
+    Procedure = "MyGridDataReader" "GridDataReader"
+    Variable = -nooutput dumy
+   
+!---- NOTE: File is case sensitive, String is not!
+   Filename = File "$TOPOGRAPHY_DATA$"
+
+   X Dim Name = String "x"
+   Y Dim Name = String "y"
+!--- 
+  Variable 1 = File "thickness"
+  Target Variable 1 = String "H"
+  Exported Variable 1 = H
+  !Valid Min Value 1 = Real $HMin
+
+  Variable 2 = File "bed"
+  Target Variable 2 = String "bedrock"
+  Exported Variable 2 = bedrock
+  
+  Variable 3 = File "surface"
+  Target Variable 3 = String "zs"
+  Exported Variable 3 = zs
+  
+  !Variable 4 = File "hydraulic_potential"
+  !Target Variable 4 = string "hydraulic potential"
+  !Exported Variable 4 = hydraulic potential
+ 
+End
+
+Solver 2
+  Equation = Reader5
+    Procedure = "./MyGridDataReader" "GridDataReader"
+    Variable = -nooutput dumy5
+   
+!---- NOTE: File is case sensitive, String is not!
+   Filename = File "$VELOCITY_DATA$"
+
+   X Dim Name = String "x"
+   Y Dim Name = String "y"
+   Is Time Counter = Logical True
+!--- 
+
+  Variable 1 = File "vnorm"
+  Target Variable 1 = String "Vobs"
+  Exported Variable 1 = Vobs
+ End
+
+
+Solver 3 
+  ! Just here to declare the variable Sheet Thickness
+  Equation = "GlaDS Thickness sheet"
+  Procedure = "ElmerIceSolvers" "GlaDSsheetThickDummy"
+  Variable = -dofs 1 "sheet thickness"
+End
+!#######################################################
+!#######################################################
+Equation 1
+  Active Solvers(3) = 1 2 3
+End
+
+
+Initial Condition 1
+  Sheet Thickness = Real 0.05
+End
+
+

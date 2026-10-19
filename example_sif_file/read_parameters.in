@@ -1,0 +1,24 @@
+!##########################################################
+! #### NAMES
+!##########################################################
+
+! the name of the mesh directory
+
+!##########################################################y
+! ####  Physical Parameters
+!##########################################################
+
+include parameters_spinup.in 
+
+!##########################################################
+!###### DATA FILES
+!##########################################################
+!##########################################################
+! ## TOPOGRAPHY (read <thickness> and <bed>)
+$TOPOGRAPHY_DATA="../inputdata/bedmachine_ktransect_hydropotential.nc"
+
+!## Observed velocity (used for postprocessing; read <vnorm>)
+$VELOCITY_DATA="../inputdata/greenland_vel_mosaic250_v1_with_vnorm_mps.nc"
+
+
+

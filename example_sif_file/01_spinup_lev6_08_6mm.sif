@@ -1,0 +1,258 @@
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+!! spinup lev 6                    !!
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+check keywords warn
+echo on
+
+$Bnum = "spinup_08_6mm"  
+$namerun = "spinup_08_6mm"
+
+!---LUA BEGIN
+! assert(loadfile('parameters_mks_hkc_llc.lua'))()
+!---LUA END
+
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+! All Units are in m, year, Pa
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+#yearindays = 365.00 
+#yearinsec = yearindays*24*60*60 
+#MPainPa = 1.0e6 
+#dayinsec = 24*60*60
+
+#Iter = 365*24
+#dtIni = dayinsec/24
+#OutPut = 24
+
+Header
+  Mesh DB "." "domain"
+End
+
+!---------------------------------------------------
+!---------------- CONSTANTS ------------------------
+!---------------------------------------------------
+
+Constants
+  Latent Heat = Real #lw
+  Gravity Norm = Real #gravity
+  Fresh Water Density = Real #rhow
+  Ice Density = Real #rhoi
+  Sheet Thickness Variable Name = String "Sheet Thickness"
+  Hydraulic Potential Variable Name = String "Hydraulic Potential"
+  Channel Area Variable Name = String "Channel Area"
+  Bedrock Variable Name = String "bedrock"
+End
+
+!---------------------------------------------------
+!---------------- SIMULATION -----------------------
+!---------------------------------------------------
+
+Simulation
+  Coordinate System  = Cartesian 2D 
+  Simulation Type = transient
+
+  Timestepping Method = "bdf"
+  BDF Order = 1
+
+  Timestep Intervals(1) = #Iter
+  Output Intervals(1) = #OutPut
+  Timestep Sizes(1) = #dtIni 
+
+  Steady State Max Iterations = 1 
+  Steady State Min Iterations = 1
+  
+  Restart File = "INIT500_.result" 
+   
+  Output File = "$namerun".result"
+  Post File = $namerun$".vtu"
+
+  max output level = 3
+End
+
+!---------------------------------------------------
+!---------------- BODIES ---------------------------
+!---------------------------------------------------
+
+! This body is located at the ice/bed interface and will be used to solve 
+! the sheet equation
+Body 1
+  Name= "sheet"
+  Equation = 1
+  Material = 1
+  Body Force = 1
+  Initial Condition = 1
+End
+
+
+!---------------------------------------------------
+!---------------- INITIAL CONDITIONS ---------------
+!---------------------------------------------------
+
+!! for the sheet 
+Initial Condition 1
+  Sheet Thickness = Real #0.05
+End
+
+!---------------------------------------------------
+!---------------- BODY FORCES ----------------------
+!---------------------------------------------------
+
+Body Force 1
+ Hydraulic potential volume source = Real #19.02e-11		! basal melt 6mm/a	
+End
+
+!---------------------------------------------------
+!---------------- MATERIALS ------------------------
+!---------------------------------------------------
+
+!! ice material properties in SI
+Material 1
+  Density = Real #rhoi          
+  Glen Exponent = Real #ng
+
+! For the sheet 
+  Sheet Conductivity = Real #ks 
+  Sheet flow exponent alpha = Real #alphas
+  Sheet flow exponent beta = Real #betas
+  Englacial Void Ratio = Real #ev       
+
+  Bedrock Bump Length = Real #lr
+  Bedrock Bump High = Real #hr
+  Sheet Closure Coefficient = Real #as 
+! For the Channels
+  Channel Conductivity = Real #kc 
+  Channel flow exponent alpha = Real #alphac
+  Channel flow exponent beta = Real #betac
+  Channel Closure Coefficient = Real #ac
+  Sheet Width Over Channel = Real #lc
+  Pressure Melting Coefficient = Real #ct
+  Water Heat Capacity = Real #cw
+
+! For both
+  Sliding Velocity = equals basal_sliding_speed
+  Ice Normal Stress = Variable "h" 
+     Real lua "rhoi*gravity*tx[0]" 
+End
+
+!---------------------------------------------------
+!---------------- SOLVERS --------------------------
+!---------------------------------------------------
+!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+Solver 1 
+  Equation = "GlaDS Coupled sheet"
+  Procedure = "ElmerIceSolvers" "GlaDSCoupledSolver"
+  Variable = -dofs 1 "Hydraulic Potential"
+
+  Activate Channels = Logical True
+  Activate Melt from Channels = Logical True
+  Neglect Sheet Thickness in Potential = Logical True
+
+  ! choices are EXPLICIT, CRANK-NICOLSON, IMPLICIT
+  Channels Integration method = String "Crank-Nicolson"
+  Sheet Integration method = String "Crank-Nicolson"
+  
+  Max Channel Area = Real #maxarea
+  Max Sheet Thickness = Real #maxh
+
+  Exported Variable 1 = -dofs 1 "Vclose"
+  Exported Variable 2 = -dofs 1 "Wopen"
+  Exported Variable 3 = -dofs 1 "Normal Stress"
+  Exported Variable 4 = -dofs 1 "Water Pressure"
+  Exported Variable 5 = -dofs 1 "Effective Pressure"
+  Exported Variable 6 = -dofs 2 "Sheet Discharge"
+  Exported Variable 7 = -dofs 1 "Sheet Storage"
+  Exported Variable 8 = -dofs 1 "Zs"
+  Exported Variable 9 = -dofs 1 "bedrock"
+
+  Linear System Solver = Iterative
+  Linear System Max Iterations = 500
+  Linear System Iterative Method = BiCGStabl
+  Linear System Preconditioning = none
+  Linear System Abort Not Converged = True
+  Linear System Residual Output = 1000
+  Linear System Convergence Tolerance = 1.0e-6
+  
+  Nonlinear System Max Iterations = 30
+  Nonlinear System Convergence Tolerance  = 1.0e-4
+  Nonlinear System Relaxation Factor = 1.00
+
+  Coupled Max Iterations = Integer 30
+  Coupled Convergence Tolerance = Real 1.0e-4
+
+  Steady State Convergence Tolerance = 1.0e-03
+End
+
+Solver 2 
+  ! Just here to declare the variable Sheet Thickness
+  Equation = "GlaDS Thickness sheet"
+  Procedure = "ElmerIceSolvers" "GlaDSsheetThickDummy"
+  Variable = -dofs 1 "Sheet Thickness"
+End
+
+Solver 3 
+  ! Just here for output and declare the Channel Area variable
+  ! It is executed simultaneously to saving
+  Exec Solver =After Timestep
+  Equation = "GlaDS Channel OutPut"
+  Procedure = "ElmerIceSolvers" "GlaDSchannelOut"
+  Variable = -dofs 1 "Channel Area"
+! the variable is define on the edges only
+  Element = "n:0 e:1"
+
+  Exported Variable 1 = -dofs 1 "Channel Flux"
+ !  Exported Variable 2 = -dofs 1 "Channel area"
+
+  VTU OutPutFile = Logical True   ! set to TRUE to have VTU output
+  VTU BinaryFile = Logical False   
+
+  Channels OutPut Directory Name = String "results"
+  Channels OutPut File Name = String "$namerun"_channels"
+End
+
+Solver 4
+    equation = basal sliding Reader
+    Procedure = "./MyGridDataReader" "GridDataReader"
+    !Exec Solver = "before timestep"
+    Variable = -nooutput dummy
+    Filename = File "../inputdata/basal_velocities.nc"
+    
+    X Dim Name = String "x"
+    Y Dim Name = String "y"
+    
+    Variable 1 = File "v_basal"
+    Target Variable 1 = String "basal_sliding_speed"
+    Exported Variable 1 = basal_sliding_speed 
+End
+
+!---------------------------------------------------
+!---------------- EQUATIONS ------------------------
+!---------------------------------------------------
+! Equation for the ice
+Equation 1
+  Active Solvers (4) = 1 2 3 4
+End
+
+
+!---------------------------------------------------
+!---------------- BOUNDARY CONDITIONS --------------
+!---------------------------------------------------
+
+Boundary Condition 1
+  Name = "inland"
+  Target Boundaries(1) = 1
+  No Channel BC = Logical True
+  Sheet Flux BC = Logical True
+  Sheet Flux = Variable Water Pressure
+  	Real lua "-k * tx[0]"
+End
+
+Boundary Condition 2
+  Name = "front"
+  Target Boundaries(1) = 2
+  No Channel BC = Logical True
+  Hydraulic Potential = Variable "bedrock"
+	  Real lua "rhow*gravity*tx[0]"
+End

@@ -22,15 +22,16 @@ To reproduce forcing files you'll need to adjust the paths for input files in th
 - gnss surface velocities; Tedstone, A., Nienow, P., Sole, A., Bartholomew, I., Cowton, T., Mair, D., & King, M. (2026). Greenland Ice Sheet displacement on the K-Transect, south-west Greenland Ice Sheet from in-situ GNSS measurements (Version 3.0) [Data set]. NERC EDS UK Polar Data Centre. https://doi.org/10.5285/0adac071-a2fa-41a4-952f-4a418fa32e2e and https://zenodo.org/records/18611668?preview=1&token=eyJhbGciOiJIUzUxMiIsImlhdCI6MTc3MzgzNTcwMSwiZXhwIjoxNzk4Njc1MTk5fQ.eyJpZCI6IjUxOTA4ZWE2LTY0MGEtNGY4OC1iY2I2LTc2ODAwNzEyNzQ4OCIsImRhdGEiOnt9LCJyYW5kb20iOiJmYTZmYjg5NDgxY2FlMTk4N2JlOTJlNTljMmYwNDYyMSJ9.zrTNreM4ftSFPw3aEJjPbkjWQKLcKl5Iwz_Q3xxiQKyP6YXqsaNSs8We3ThrxrrihHMO2oPM8D5uhNwwPrbqjg
 
 
-Adjust line 128 in generate_forcing_files.py to generate forcing files for different years. 
+Adjust line 128 in `generate_forcing_files.py` to generate forcing files for different years. 
   
 
 
 ## Example_sif_files
 This folder contains sif files to reproduce the simulations with Elmer/Ice. The domain is split into 8 partitions, the "domain" folder contains the mesh files read by Elmer/Ice. 
 
-- 00_spinup.sif: initializes the domain. This is not a real simulation but maps the basal and surface geometry as well as surace velocities to the mesh. The paths for topography (Bedmachine v3, 10.5067/2CIX82HUV88Y) and surface velocity (Measures multi-year mosaic, converted to m/s; doi: 10.5067/QUA5Q9SVMSJG) data need to be adjusted in read_parameters.in
-- 01_spinup_08_6mm.sif: is the file for spinup using constant sheet input of 6 mm/yr.
-- 08_run_2009_ii.sif: runs a simulation for the year 2009, restarting from the final state of the spinup. The paths for the forcing files in Solver 4 need to be adjusted.
-- parameters_mks_hkc_llc.lua contains the model parameters.
+- `00_spinup.sif`: initializes the domain. This is not a real simulation but maps the basal and surface geometry as well as surace velocities to the mesh. The paths for topography (Bedmachine v3, 10.5067/2CIX82HUV88Y) and surface velocity (Measures multi-year mosaic, converted to m/s; doi: 10.5067/QUA5Q9SVMSJG) data need to be adjusted in read_parameters.in
+- `01_spinup_08_6mm.sif`: is the file for spinup using constant sheet input of 6 mm/yr.
+- `08_run_2009_ii.sif`: runs a simulation for the year 2009, restarting from the final state of the spinup. The paths for the forcing files in Solver 4 need to be adjusted.
+- `parameters_mks_hkc_llc.lua` contains the model parameters.
   
+For documentation on Elmer/Ice see https://elmerice.elmerfem.org/wiki/doku.php?id=start

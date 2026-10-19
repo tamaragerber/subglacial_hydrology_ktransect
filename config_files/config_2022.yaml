@@ -1,0 +1,58 @@
+meta:
+  name: nolake_run_2022
+  year: 2022
+
+date_range:
+  start: 2022-01-01
+  finish: 2022-12-31
+  
+input_files:
+  dem: ../data/domain_files/DEM_lev6domain_outer_catchment.tif
+  seb: ../data/van_As_meltmodel/runoff(mm)_IP_2023_bins.txt
+  surface_velocity: ../data/domain_files/surface_velocties_mps_outer_catchment_lev6.nc
+
+gnss_stations:
+ lev4:
+    x: -175032
+    y: -2503894
+    gnss_file: ../data/its_live_velocities/lev4_2021-2025_24h.csv
+    ice_thickness: 1018
+ lev5: 
+    x: -149294
+    y: -2502595
+    gnss_file: ../data/gnss_velocities/hislide-level2/lev5/lev5_2021_129_2024_122_disp_velocity_24h_legacy_tg.csv
+    ice_thickness: 1294
+ lev6: 
+    x: -111457
+    y: -2503397
+    gnss_file: ../data/gnss_velocities/hislide-level2/lev6/lev6_2021_127_2024_121_disp_velocity_5d_legacy_tg.csv
+    ice_thickness: 1422
+
+basal_sliding:
+  basal_sliding_fraction: 0.7
+  transient_basal_sliding: True
+
+melt_thresholds:
+  lower_elev: 1300
+  lower_melt: 0.5
+  upper_elev: 1700
+  upper_melt: 0.8
+  melt_scaling: 1.0
+
+lake_drainage:
+  drainage: False
+  lev5_volume: 10661850
+  lev5_doy: 212
+  lev5x: -149294
+  lev5y: -2502595
+  lev6_volume: 0 
+  lev6_doy: 0
+  lev6x: -120995
+  lev6y: -2503052
+  
+outputs:
+  path: 2022_s/
+  daily_netcdfs: True
+  diagnostic_netcdfs: False
+  diagnostic_plots: False
+

@@ -29,4 +29,8 @@ Adjust line 128 in generate_forcing_files.py to generate forcing files for diffe
 ## Example_sif_files
 This folder contains sif files to reproduce the simulations with Elmer/Ice. The domain is split into 8 partitions, the "domain" folder contains the mesh files read by Elmer/Ice. 
 
-- 00_spinup.sif: initializes the domain. This is not a real simulation but maps the basal and surface geometry as well as surace velocities to the mesh. 
+- 00_spinup.sif: initializes the domain. This is not a real simulation but maps the basal and surface geometry as well as surace velocities to the mesh. The paths for topography (Bedmachine v3, 10.5067/2CIX82HUV88Y) and surface velocity (Measures multi-year mosaic, converted to m/s; doi: 10.5067/QUA5Q9SVMSJG) data need to be adjusted in read_parameters.in
+- 01_spinup_08_6mm.sif: is the file for spinup using constant sheet input of 6 mm/yr.
+- 08_run_2009_ii.sif: runs a simulation for the year 2009, restarting from the final state of the spinup. The paths for the forcing files in Solver 4 need to be adjusted.
+- parameters_mks_hkc_llc.lua contains the model parameters.
+  
